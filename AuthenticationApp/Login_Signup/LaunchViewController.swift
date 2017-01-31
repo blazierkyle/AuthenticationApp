@@ -9,8 +9,10 @@
 import UIKit
 import KeychainAccess
 
-let kLoginKey = "LoginKey"
-let webserviceURL = "http://0.0.0.0:8080"
+let kLoginKey = "LoginKey" // Customizeable - Key to save the authentication token in the Keychain (String)
+let keyChainServiceName = "com.KyleBlazier.AuthenticationApp" // Customizeable - Name of Keychain we are using (String)
+let webserviceURL = "http://0.0.0.0:8080" // Customizeable - URL of the Webservice we are hitting
+let useTouchID = true // Customizeable - Whether or not you want to use 2-factor authentication
 
 class LaunchViewController: UIViewController {
     
@@ -18,7 +20,7 @@ class LaunchViewController: UIViewController {
     
     var authenticatedUser: User?
     
-    let keychain = Keychain(service: "com.KyleBlazier.AuthenticationApp")
+    let keychain = Keychain(service: keyChainServiceName)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,17 +49,32 @@ class LaunchViewController: UIViewController {
     func checkForExistingLogin() {
         
         // Try to fetch a previously saved auth token from keychain
-        do {
-            guard let authToken = try keychain.getString(kLoginKey) else {
-                print("Not authenticated - No token exists")
-                performSegue(withIdentifier: "showLogin", sender: self)
-                return
+        if useTouchID {
+            // Try get the protected value with Touch ID / device password authentication required to access it
+            DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async {
+                do {
+                    guard let authToken = try self.keychain.authenticationPrompt("Authenticate to login to your account").get(kLoginKey) else {
+                        self.authenticationErrorOccurred(errorMessage: "Not authenticated - No protected token exists")
+                        return
+                    }
+                    print("Retrieved protected auth token from Keychain: \(authToken)")
+                    self.getUserDetails(withToken: authToken)
+                } catch {
+                    self.authenticationErrorOccurred(errorMessage: "Not authenticated - No protected token exists")
+                }
             }
-            print("Retrieved auth token from Keychain: \(authToken)")
-            getUserDetails(withToken: authToken)
-        } catch {
-            print("Not authenticated - No token exists")
-            self.performSegue(withIdentifier: "showLogin", sender: self)
+        } else {
+            // Just get the value regularly in the keychain
+            do {
+                guard let authToken = try keychain.getString(kLoginKey) else {
+                    self.authenticationErrorOccurred(errorMessage: "Not authenticated - No non-protected token exists")
+                    return
+                }
+                print("Retrieved non-protected auth token from Keychain: \(authToken)")
+                getUserDetails(withToken: authToken)
+            } catch {
+                self.authenticationErrorOccurred(errorMessage: "Not authenticated - No non-protected token exists")
+            }
         }
         
     }

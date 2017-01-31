@@ -223,6 +223,7 @@
                         <outlet property="toggleLoginSignupButton" destination="qHg-XZ-e4e" id="Yfu-Rn-vtu"/>
                         <outlet property="usernameTextField" destination="Lld-2H-g3l" id="BH6-Eh-O0B"/>
                         <segue destination="F2z-YL-bSq" kind="show" identifier="showSignup" id="Ht6-PC-MvH"/>
+                        <segue destination="kgU-RH-cVX" kind="show" identifier="successfulLogin" id="TiU-Pf-VhL"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6rP-Ly-xfI" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -387,6 +388,7 @@
                         <outlet property="logoImageView" destination="gh6-LT-2kv" id="1an-Of-cBh"/>
                         <outlet property="passwordTextField" destination="M40-uL-dVp" id="3zS-S5-lXN"/>
                         <outlet property="usernameTextField" destination="2p9-JJ-2SZ" id="mCE-ha-eUj"/>
+                        <segue destination="kgU-RH-cVX" kind="show" identifier="successfulSignup" id="DSX-z4-qaX"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ddD-rB-hzX" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -454,4 +456,7 @@
         <image name="vaporBanner" width="456" height="205"/>
         <image name="vaporIcon" width="120" height="120"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="DSX-z4-qaX"/>
+    </inferredMetricsTieBreakers>
 </document>

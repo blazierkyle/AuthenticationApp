@@ -44,7 +44,7 @@ class HomeViewController: UIViewController {
         presentAlert(alertTitle: "Logout?", alertMessage: "Are you sure you'd like to logout?", cancelButtonTitle: "Cancel", cancelButtonAction: nil, okButtonTitle: "Logout", okButtonAction: { 
             
             // Remove keychain value and show login screen
-            let keychain = Keychain(service: "com.KyleBlazier.AuthenticationApp")
+            let keychain = Keychain(service: keyChainServiceName)
             do {
                 try keychain.remove(kLoginKey)
             } catch {

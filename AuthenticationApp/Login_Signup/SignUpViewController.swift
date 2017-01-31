@@ -24,7 +24,9 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
     
     var userEmail: String?
     
-    let keychain = Keychain(service: "com.KyleBlazier.AuthenticationApp")
+    let keychain = Keychain(service: keyChainServiceName)
+    
+    var authenticatedUser: User?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -233,19 +235,19 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
                     return
                 }
                 
-                // Success - present alert
-                self.presentAlert(alertTitle: "Success!", alertMessage: "Your account with the username '\(username)' has been registered!", cancelButtonTitle: "Let's Get Started!", cancelButtonAction: {
-                    self.dismissSignupVC()
-                })
-                
                 // Format & store authentication token in keychain
                 guard let user = json["user"] as? [String:Any] else {
+                    self.presentGenericError()
                     print("Couldnt get the user")
                     return
                 }
                 
+                // Convert to User model
+                self.authenticatedUser = try User(dictionary: user as [String:AnyObject])
+                
                 guard let apiKey = user["api_key"] as? String, let apiSecret = user["api_secret"] as? String else {
                     print("Couldnt get the auth values")
+                    self.presentGenericError()
                     return
                 }
                 
@@ -253,17 +255,46 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
                 
                 guard let authData = authString.data(using: .utf8) else {
                     print("Couldnt convert auth string to data")
+                    self.presentGenericError()
                     return
                 }
                 
                 let encodedAuthString = "Basic \(authData.base64EncodedString())"
                 
-                do {
-                    try self.keychain.set(encodedAuthString, key: kLoginKey)
-                    print("Auth token saved to keychain")
-                } catch let error {
-                    print("Couldn't save to Keychain: \(error.localizedDescription)")
+                if useTouchID {
+                    // Try to store the value as a protected value with Touch ID / device password authentication required to access it
+                    DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async {
+                        do {
+                            try self.keychain
+                                .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: .userPresence)
+                                .authenticationPrompt("Authenticate to allow the app to use Touch ID to log you in.")
+                                .set(encodedAuthString, key: kLoginKey)
+                            print("Auth token saved to keychain for use with Touch ID / password")
+                        } catch {
+                            print("Could not setup the app to use Touch ID with this keychain value - fallback to standard authentication")
+                            // Just store the value regularly in th keychain
+                            do {
+                                try self.keychain.set(encodedAuthString, key: kLoginKey)
+                                print("Auth token saved to keychain")
+                            } catch let error {
+                                print("Couldn't save to Keychain: \(error.localizedDescription)")
+                            }
+                        }
+                    }
+                } else {
+                    // Just store the value regularly in th keychain
+                    do {
+                        try self.keychain.set(encodedAuthString, key: kLoginKey)
+                        print("Auth token saved to keychain")
+                    } catch let error {
+                        print("Couldn't save to Keychain: \(error.localizedDescription)")
+                    }
                 }
+                
+                // Success - present alert
+                self.presentAlert(alertTitle: "Success!", alertMessage: "Your account with the username '\(username)' has been registered!", cancelButtonTitle: "Let's Get Started!", cancelButtonAction: {
+                    self.dismissSignupVC()
+                })
                 
             } catch {
                 self.presentGenericError()
@@ -320,7 +351,7 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
     
     func dismissSignupVC() {
         DispatchQueue.main.async {
-            let _ = self.navigationController?.popToRootViewController(animated: true)
+            self.performSegue(withIdentifier: "successfulSignup", sender: self)
         }
     }
 
@@ -332,5 +363,15 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func toggleLoginSignupButton(_ sender: Any) {
         let _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    
+    // MARK: - Navigation
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "successfulSignup" {
+            guard let homeVC = segue.destination as? HomeViewController else {return}
+            homeVC.currentUser = authenticatedUser
+        }
     }
 }

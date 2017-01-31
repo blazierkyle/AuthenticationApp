@@ -30,7 +30,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     var userEmail: String?
     
-    let keychain = Keychain(service: "com.KyleBlazier.AuthenticationApp")
+    let keychain = Keychain(service: keyChainServiceName)
+    
+    var authenticatedUser: User?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -274,12 +276,51 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 
                 let encodedAuthString = "Basic \(authData.base64EncodedString())"
                 
-                do {
-                    try self.keychain.set(encodedAuthString, key: kLoginKey)
-                    print("Auth token saved to keychain")
-                } catch let error {
-                    print("Couldn't save to Keychain: \(error.localizedDescription)")
+                if useTouchID {
+                    // Try to store the value as a protected value with Touch ID / device password authentication required to access it
+                    DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async {
+                        do {
+                            try self.keychain
+                                .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: .userPresence)
+                                .authenticationPrompt("Authenticate to allow the app to use Touch ID to log you in.")
+                                .set(encodedAuthString, key: kLoginKey)
+                            print("Auth token saved to keychain for use with Touch ID / password")
+                        } catch {
+                            print("Could not setup the app to use Touch ID with this keychain value - fallback to standard authentication")
+                            // Just store the value regularly in th keychain
+                            do {
+                                try self.keychain.set(encodedAuthString, key: kLoginKey)
+                                print("Auth token saved to keychain")
+                            } catch let error {
+                                print("Couldn't save to Keychain: \(error.localizedDescription)")
+                            }
+                        }
+                    }
+                } else {
+                    // Just store the value regularly in th keychain
+                    do {
+                        try self.keychain.set(encodedAuthString, key: kLoginKey)
+                        print("Auth token saved to keychain")
+                    } catch let error {
+                        print("Couldn't save to Keychain: \(error.localizedDescription)")
+                    }
                 }
+                
+                // Convert into dictionary
+                guard let responseDict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] else {
+                    self.presentGenericError()
+                    return
+                }
+                
+                guard let userDetails = responseDict["user"] as? [String:AnyObject] else {
+                    self.presentGenericError()
+                    return
+                }
+
+                print(userDetails)
+                
+                // Convert to User model
+                self.authenticatedUser = try User(dictionary: userDetails)
                 
                 // Success - dismiss view controller
                 self.dismissLoginVC()
@@ -340,7 +381,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     func dismissLoginVC() {
         DispatchQueue.main.async {
-            let _ = self.navigationController?.popToRootViewController(animated: true)
+            self.performSegue(withIdentifier: "successfulLogin", sender: self)
         }
     }
     
@@ -355,6 +396,16 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     func removeActivityIndicator() {
         activityIndicator.stopAnimating()
         UIApplication.shared.endIgnoringInteractionEvents()
+    }
+    
+    
+    // MARK: - Navigation
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "successfulLogin" {
+            guard let homeVC = segue.destination as? HomeViewController else {return}
+            homeVC.currentUser = authenticatedUser
+        }
     }
 
 }
