@@ -261,6 +261,8 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
                 
                 let encodedAuthString = "Basic \(authData.base64EncodedString())"
                 
+                self.authenticatedUser?.authToken = encodedAuthString
+                
                 if useTouchID {
                     // Try to store the value as a protected value with Touch ID / device password authentication required to access it
                     DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async {

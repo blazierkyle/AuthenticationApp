@@ -306,21 +306,11 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                     }
                 }
                 
-                // Convert into dictionary
-                guard let responseDict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] else {
-                    self.presentGenericError()
-                    return
-                }
-                
-                guard let userDetails = responseDict["user"] as? [String:AnyObject] else {
-                    self.presentGenericError()
-                    return
-                }
-
-                print(userDetails)
+                print(user)
                 
                 // Convert to User model
-                self.authenticatedUser = try User(dictionary: userDetails)
+                self.authenticatedUser = try User(dictionary: user as [String:AnyObject])
+                self.authenticatedUser?.authToken = encodedAuthString
                 
                 // Success - dismiss view controller
                 self.dismissLoginVC()

@@ -89,7 +89,7 @@ class LaunchViewController: UIViewController {
         
         // Add required parameters and set header value
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue(authString, forHTTPHeaderField: "Authorization") // use encodedAuthString instead of authString if we just have API key and API secret
+        request.addValue(authString, forHTTPHeaderField: "Authorization")
         
         displayActivityIndicator()
         
@@ -155,6 +155,7 @@ class LaunchViewController: UIViewController {
                 
                 // Convert to User model
                 self.authenticatedUser = try User(dictionary: userDetails as [String:AnyObject])
+                self.authenticatedUser?.authToken = authString
                 
                 // User is authenticated - Segue to the home screen
                 DispatchQueue.main.async {
