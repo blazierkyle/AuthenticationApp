@@ -77,6 +77,27 @@ class HomeViewController: UIViewController {
                 print("error removing keychain value")
             }
             
+            // Service call to logout of session on server
+            // Fetch authentication token from User model
+            guard let authToken = self.currentUser?.authToken else {
+                print("Don't have an auth token for this user")
+                self.presentGenericError()
+                return
+            }
+            
+            // Form URLRequest
+            guard let url = URL(string: "\(webserviceURL)/api/v1/logout") else {return}
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
+            
+            // Add required parameters and set header value
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.addValue(authToken, forHTTPHeaderField: "Authorization")
+            
+            let task = URLSession.shared.dataTask(with: request)
+            task.resume()
+            
             DispatchQueue.main.async {
                 let _ = self.navigationController?.popToRootViewController(animated: true)
             }

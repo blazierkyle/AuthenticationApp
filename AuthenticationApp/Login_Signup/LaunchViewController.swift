@@ -84,7 +84,7 @@ class LaunchViewController: UIViewController {
         // Form URLRequest
         guard let url = URL(string: "\(webserviceURL)/api/v1/me") else {return}
         var request = URLRequest(url: url)
-        request.httpMethod = "GET"
+        request.httpMethod = "POST"
         request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
         
         // Add required parameters and set header value
