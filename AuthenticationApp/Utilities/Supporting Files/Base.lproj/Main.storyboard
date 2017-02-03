@@ -407,29 +407,66 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="csv-kD-cCw">
-                                <rect key="frame" x="16" y="232" width="343" height="371"/>
-                                <string key="text">You've successfully authenticated with this app's backend. Try quitting the app and re-opening to test out the persistent login using a stored Authentication Token</string>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="swiftLogo" translatesAutoresizingMaskIntoConstraints="NO" id="7BB-0w-RGY">
-                                <rect key="frame" x="117" y="84" width="140" height="140"/>
+                                <rect key="frame" x="117" y="519" width="140" height="140"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="140" id="LSs-mP-o9O"/>
                                     <constraint firstAttribute="height" constant="140" id="omm-km-5Yd"/>
                                 </constraints>
                             </imageView>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" keyboardDismissMode="onDrag" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="zgj-zb-hUg">
+                                <rect key="frame" x="0.0" y="28" width="375" height="483"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="formCell" id="Hsl-J7-Lpb" customClass="FormTableViewCell" customModule="AuthenticationApp" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Hsl-J7-Lpb" id="d9x-sN-baY">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="lI0-tm-NEB">
+                                                    <rect key="frame" x="166" y="6" width="201" height="30"/>
+                                                    <nil key="textColor"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                    <textInputTraits key="textInputTraits"/>
+                                                </textField>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SfH-2b-JkD">
+                                                    <rect key="frame" x="8" y="11" width="150" height="21"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="150" id="Td8-Nk-XDM"/>
+                                                    </constraints>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="bottomMargin" secondItem="SfH-2b-JkD" secondAttribute="bottom" constant="3" id="7xJ-VT-9JM"/>
+                                                <constraint firstItem="lI0-tm-NEB" firstAttribute="top" secondItem="d9x-sN-baY" secondAttribute="top" constant="6" id="W9T-D0-EIY"/>
+                                                <constraint firstAttribute="trailing" secondItem="lI0-tm-NEB" secondAttribute="trailing" constant="8" id="dBI-sI-akS"/>
+                                                <constraint firstAttribute="bottom" secondItem="lI0-tm-NEB" secondAttribute="bottom" constant="7" id="hk9-6a-AQj"/>
+                                                <constraint firstItem="lI0-tm-NEB" firstAttribute="leading" secondItem="SfH-2b-JkD" secondAttribute="trailing" constant="8" id="nW6-e8-pCK"/>
+                                                <constraint firstItem="SfH-2b-JkD" firstAttribute="leading" secondItem="d9x-sN-baY" secondAttribute="leadingMargin" id="te3-C9-h0K"/>
+                                                <constraint firstItem="SfH-2b-JkD" firstAttribute="top" secondItem="d9x-sN-baY" secondAttribute="topMargin" constant="3" id="uTK-hr-0dS"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="label" destination="SfH-2b-JkD" id="7We-Nt-6cX"/>
+                                            <outlet property="textField" destination="lI0-tm-NEB" id="4Ev-xj-8OF"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                            </tableView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="csv-kD-cCw" firstAttribute="trailing" secondItem="ONl-cV-lw7" secondAttribute="trailingMargin" id="RrI-Rw-XmD"/>
-                            <constraint firstItem="7BB-0w-RGY" firstAttribute="top" secondItem="7WB-Ov-doB" secondAttribute="bottom" constant="20" id="YLa-kX-Dm4"/>
-                            <constraint firstItem="xXx-jE-TGu" firstAttribute="top" secondItem="csv-kD-cCw" secondAttribute="bottom" constant="20" id="ixL-zg-QfR"/>
+                            <constraint firstItem="7BB-0w-RGY" firstAttribute="top" secondItem="zgj-zb-hUg" secondAttribute="bottom" constant="8" id="8mF-23-KVB"/>
+                            <constraint firstAttribute="trailing" secondItem="zgj-zb-hUg" secondAttribute="trailing" id="G2P-KE-igE"/>
+                            <constraint firstAttribute="bottomMargin" secondItem="7BB-0w-RGY" secondAttribute="bottom" constant="8" id="REC-BU-L8g"/>
+                            <constraint firstItem="zgj-zb-hUg" firstAttribute="leading" secondItem="ONl-cV-lw7" secondAttribute="leading" id="hf2-Vn-3p1"/>
+                            <constraint firstItem="zgj-zb-hUg" firstAttribute="top" secondItem="7WB-Ov-doB" secondAttribute="bottom" constant="8" id="hmA-JJ-zmo"/>
                             <constraint firstItem="7BB-0w-RGY" firstAttribute="centerX" secondItem="ONl-cV-lw7" secondAttribute="centerX" id="kGo-BD-owV"/>
-                            <constraint firstItem="csv-kD-cCw" firstAttribute="top" secondItem="7BB-0w-RGY" secondAttribute="bottom" constant="8" id="yEG-Hx-4qO"/>
-                            <constraint firstItem="csv-kD-cCw" firstAttribute="leading" secondItem="ONl-cV-lw7" secondAttribute="leadingMargin" id="yJd-Bz-rNe"/>
                         </constraints>
                     </view>
                     <toolbarItems/>
@@ -439,11 +476,16 @@
                                 <action selector="logoutButtonPressed:" destination="kgU-RH-cVX" id="g2O-wt-26u"/>
                             </connections>
                         </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="Done" style="done" id="EPC-f2-JIA">
+                            <connections>
+                                <action selector="doneButtonPressed:" destination="kgU-RH-cVX" id="mkR-Lx-AyO"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <outlet property="displayLabel" destination="csv-kD-cCw" id="J1H-CI-aAy"/>
                         <outlet property="logoImageView" destination="7BB-0w-RGY" id="VKz-6q-vg2"/>
+                        <outlet property="userDetailsTableView" destination="zgj-zb-hUg" id="c1m-3E-Ayw"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dpt-GA-lLc" sceneMemberID="firstResponder"/>

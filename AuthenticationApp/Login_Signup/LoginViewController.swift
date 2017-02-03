@@ -171,167 +171,34 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
     
     func loginWithUsername(username : String, password : String) {
+        
         displayActivityIndicator()
         
-        // Form URLRequest
-        guard let url = URL(string: "\(webserviceURL)/api/v1/login") else {return}
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
-        
-        // Add required parameters and set header value
-        let paramsDict = ["username": username, "password": password]
-        let dictData = try? JSONSerialization.data(withJSONObject: paramsDict)
-        request.httpBody = dictData
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        ServiceManager.sharedInstance.login(registrationDict: ["username": username, "password": password], successBlock: { (currentUser) in
             
-            DispatchQueue.main.async {
-                self.removeActivityIndicator()
-            }
+            self.removeActivityIndicator()
             
-            if let error = error {
-                self.presentAlert(alertTitle: "Error", alertMessage: error.localizedDescription)
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                // No decodable response
+            guard let currentUser = currentUser else {
                 self.presentGenericError()
                 return
             }
             
-            guard let data = data else {
-                // No data to decode
+            self.authenticatedUser = currentUser
+            
+            self.dismissLoginVC()
+            
+        }) { (errorMessage) in
+            
+            self.removeActivityIndicator()
+            
+            guard let errorMessage = errorMessage else {
                 self.presentGenericError()
                 return
             }
             
-            guard httpResponse.statusCode == 200 else {
-                do {
-                    guard let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] else {
-                        self.presentGenericError()
-                        return
-                    }
-                    
-                    // Parsed erroneous response into a dictionary - check for errors
-                    guard let error = json["error"] as? Bool else {
-                        self.presentGenericError()
-                        return
-                    }
-                    guard error else {
-                        self.presentGenericError()
-                        return
-                    }
-                    guard let errorMessage = json["message"] as? String else {
-                        self.presentGenericError()
-                        return
-                    }
-                    self.presentAlert(alertTitle: "Error", alertMessage: errorMessage)
-                    
-                } catch {
-                    self.presentGenericError()
-                }
-                return
-            }
-            
-            do {
-                guard let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] else {
-                    self.presentGenericError()
-                    return
-                }
-                
-                // Check for errors
-                if let error = json["error"] {
-                    self.presentAlert(alertTitle: "Error", alertMessage: "\(error)")
-                    return
-                }
-                
-                guard let success = json["success"] as? Bool, success == true else {
-                    self.presentGenericError()
-                    return
-                }
-                
-                // Format & store authentication token in keychain
-                guard let user = json["user"] as? [String:Any] else {
-                    print("Couldnt get the user after successfully logging in")
-                    self.presentGenericError()
-                    return
-                }
-                
-                guard let apiKey = user["api_key"] as? String, let apiSecret = user["api_secret"] as? String else {
-                    print("Couldnt get the auth values after successfully logging in")
-                    self.presentGenericError()
-                    return
-                }
-                
-                let authString = "\(apiKey):\(apiSecret)"
-                
-                guard let authData = authString.data(using: .utf8) else {
-                    print("Couldnt convert auth string to data after successfully logging in")
-                    self.presentGenericError()
-                    return
-                }
-                
-                let encodedAuthString = "Basic \(authData.base64EncodedString())"
-                
-                if useTouchID {
-                    // Try to store the value as a protected value with Touch ID / device password authentication required to access it
-                    DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async {
-                        do {
-                            try self.keychain
-                                .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: .userPresence)
-                                .authenticationPrompt("Authenticate to allow the app to use Touch ID to log you in.")
-                                .set(encodedAuthString, key: kLoginKey)
-                            print("Auth token saved to keychain for use with Touch ID / password")
-                        } catch {
-                            print("Could not setup the app to use Touch ID with this keychain value - fallback to standard authentication")
-                            // Just store the value regularly in th keychain
-                            do {
-                                try self.keychain.set(encodedAuthString, key: kLoginKey)
-                                print("Auth token saved to keychain")
-                            } catch let error {
-                                print("Couldn't save to Keychain: \(error.localizedDescription)")
-                            }
-                        }
-                    }
-                } else {
-                    // Just store the value regularly in th keychain
-                    do {
-                        try self.keychain.set(encodedAuthString, key: kLoginKey)
-                        print("Auth token saved to keychain")
-                    } catch let error {
-                        print("Couldn't save to Keychain: \(error.localizedDescription)")
-                    }
-                }
-                
-                // Convert into dictionary
-                guard let responseDict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] else {
-                    self.presentGenericError()
-                    return
-                }
-                
-                guard let userDetails = responseDict["user"] as? [String:AnyObject] else {
-                    self.presentGenericError()
-                    return
-                }
-
-                print(userDetails)
-                
-                // Convert to User model
-                self.authenticatedUser = try User(dictionary: userDetails)
-                
-                // Success - dismiss view controller
-                self.dismissLoginVC()
-                
-            } catch {
-                self.presentGenericError()
-            }
+            self.presentAlert(alertTitle: "Error", alertMessage: errorMessage)
         }
         
-        task.resume()
-
     }
     
     
