@@ -85,18 +85,7 @@ class HomeViewController: UIViewController {
                 return
             }
             
-            // Form URLRequest
-            guard let url = URL(string: "\(webserviceURL)/api/v1/logout") else {return}
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
-            
-            // Add required parameters and set header value
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.addValue(authToken, forHTTPHeaderField: "Authorization")
-            
-            let task = URLSession.shared.dataTask(with: request)
-            task.resume()
+            ServiceManager.sharedInstance.logout(authToken: authToken)
             
             DispatchQueue.main.async {
                 let _ = self.navigationController?.popToRootViewController(animated: true)
@@ -123,112 +112,36 @@ class HomeViewController: UIViewController {
         
         // Fetch authentication token from User model
         guard let authToken = currentUser?.authToken else {
-            print("Don't have an auth token for this user")
+            ServiceManager.sharedInstance.logMessage(message: "Don't have an auth token for this user")
             self.presentGenericError()
             return
         }
         
-        // Form URLRequest
-        guard let url = URL(string: "\(webserviceURL)/api/v1/update") else {return}
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
-        
-        // Add required parameters and set header value
-        let paramsDict = changedValues
-        let dictData = try? JSONSerialization.data(withJSONObject: paramsDict)
-        request.httpBody = dictData
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue(authToken, forHTTPHeaderField: "Authorization")
-        
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        ServiceManager.sharedInstance.updateUserDetails(valuesToUpdate: changedValues, authToken: authToken, successBlock: { (currentUser) in
             
-            if let error = error {
-                self.presentAlert(alertTitle: "Error", alertMessage: error.localizedDescription)
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                // No decodable response
+            guard let currentUser = currentUser else {
                 self.presentGenericError()
                 return
             }
             
-            guard let data = data else {
-                // No data to decode
+            self.currentUser = currentUser
+            
+            // Remove all changed values
+            self.changedValues.removeAll()
+            
+            // Success - present alert
+            self.presentAlert(alertTitle: "Success!", alertMessage: "Your user details have been updated!")
+            
+        }) { (errorMessage) in
+            
+            guard let errorMessage = errorMessage else {
                 self.presentGenericError()
                 return
             }
             
-            guard httpResponse.statusCode == 200 else {
-                do {
-                    guard let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] else {
-                        self.presentGenericError()
-                        return
-                    }
-                    
-                    // Parsed erroneous response into a dictionary - check for errors
-                    guard let error = json["error"] as? Bool else {
-                        self.presentGenericError()
-                        return
-                    }
-                    guard error else {
-                        self.presentGenericError()
-                        return
-                    }
-                    guard let errorMessage = json["message"] as? String else {
-                        self.presentGenericError()
-                        return
-                    }
-                    self.presentAlert(alertTitle: "Error", alertMessage: errorMessage)
-                    
-                } catch {
-                    self.presentGenericError()
-                }
-                return
-            }
+            self.presentAlert(alertTitle: "Error", alertMessage: errorMessage)
             
-            do {
-                guard let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] else {
-                    self.presentGenericError()
-                    return
-                }
-                
-                // Check for errors
-                if let error = json["error"] {
-                    self.presentAlert(alertTitle: "Error", alertMessage: "\(error)")
-                    return
-                }
-                
-                guard let success = json["success"] as? Bool, success == true else {
-                    self.presentGenericError()
-                    return
-                }
-                
-                // Format & store authentication token in keychain
-                guard let userDetails = json["user"] as? [String:Any] else {
-                    print("Couldnt get the user after successfully logging in")
-                    self.presentGenericError()
-                    return
-                }
-                
-                print(userDetails)
-                
-                // Convert to User model
-                self.currentUser = try User(dictionary: userDetails as [String:AnyObject])
-                self.currentUser?.authToken = authToken
-                
-                self.changedValues.removeAll()
-                
-                // Success - present alert
-                self.presentAlert(alertTitle: "Success!", alertMessage: "Your user details have been updated!")
-                
-            } catch {
-                self.presentGenericError()
-            }
         }
-        
-        task.resume()
         
     }
     

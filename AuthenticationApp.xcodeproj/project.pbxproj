@@ -10,6 +10,7 @@
 		258B628F1E3FA4B60051E0C4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258B628E1E3FA4B60051E0C4 /* AppDelegate.swift */; };
 		258B62A31E3FAADC0051E0C4 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258B62A11E3FAADC0051E0C4 /* LoginViewController.swift */; };
 		258B62A41E3FAADC0051E0C4 /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258B62A21E3FAADC0051E0C4 /* SignUpViewController.swift */; };
+		259144301E42C4F700822354 /* ServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2591442F1E42C4F700822354 /* ServiceManager.swift */; };
 		25EA75BD1E41A22600A08F2E /* FormTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25EA75BC1E41A22600A08F2E /* FormTableViewCell.swift */; };
 		25FAB4CD1E40609A00F5BDBE /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FAB4CC1E40609A00F5BDBE /* HomeViewController.swift */; };
 		25FAB4CF1E406E8400F5BDBE /* LaunchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FAB4CE1E406E8400F5BDBE /* LaunchViewController.swift */; };
@@ -27,6 +28,7 @@
 		258B628E1E3FA4B60051E0C4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		258B62A11E3FAADC0051E0C4 /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LoginViewController.swift; path = Login_Signup/LoginViewController.swift; sourceTree = "<group>"; };
 		258B62A21E3FAADC0051E0C4 /* SignUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SignUpViewController.swift; path = Login_Signup/SignUpViewController.swift; sourceTree = "<group>"; };
+		2591442F1E42C4F700822354 /* ServiceManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ServiceManager.swift; path = Utilities/ServiceManager.swift; sourceTree = "<group>"; };
 		25EA75BC1E41A22600A08F2E /* FormTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FormTableViewCell.swift; path = Home/View/FormTableViewCell.swift; sourceTree = "<group>"; };
 		25FAB4CC1E40609A00F5BDBE /* HomeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HomeViewController.swift; path = Home/HomeViewController.swift; sourceTree = "<group>"; };
 		25FAB4CE1E406E8400F5BDBE /* LaunchViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LaunchViewController.swift; path = Login_Signup/LaunchViewController.swift; sourceTree = "<group>"; };
@@ -57,6 +59,7 @@
 		251079921E400E6A0000E086 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				2591442F1E42C4F700822354 /* ServiceManager.swift */,
 				25FAB4CA1E405B3C00F5BDBE /* Models */,
 				25FAB4C81E405B1200F5BDBE /* Supporting Files */,
 			);
@@ -300,6 +303,7 @@
 				258B62A41E3FAADC0051E0C4 /* SignUpViewController.swift in Sources */,
 				258B628F1E3FA4B60051E0C4 /* AppDelegate.swift in Sources */,
 				25FAB4DE1E406F3100F5BDBE /* UIViewController+Extensions.swift in Sources */,
+				259144301E42C4F700822354 /* ServiceManager.swift in Sources */,
 				25FAB4CF1E406E8400F5BDBE /* LaunchViewController.swift in Sources */,
 				25FAB4CD1E40609A00F5BDBE /* HomeViewController.swift in Sources */,
 				25FAB4D11E406E9500F5BDBE /* User.swift in Sources */,
