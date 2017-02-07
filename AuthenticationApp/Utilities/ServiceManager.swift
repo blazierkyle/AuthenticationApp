@@ -296,7 +296,7 @@ class ServiceManager {
         // Form URLRequest
         guard let url = URL(string: "\(webserviceURL)/api/v1/me") else {return}
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = "GET"
         request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
         
         // Add required parameters and set header value

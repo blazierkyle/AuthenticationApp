@@ -8,6 +8,7 @@
 
 import UIKit
 import KeychainAccess
+import LocalAuthentication
 
 class HomeViewController: UIViewController {
     
@@ -99,7 +100,36 @@ class HomeViewController: UIViewController {
         if changedValues.count > 0 {
         
             presentAlert(alertTitle: "Save Changes?", alertMessage: "Would you like to save your changes?", cancelButtonTitle: "Cancel", cancelButtonAction: nil, okButtonTitle: "Save", okButtonAction: {
-                self.updateUserInfo()
+                
+                // Step-up authentication using Touch ID to verify the user
+                /* 
+                   ** NOTE ** In a Production app you would have a fallback here for users
+                    who do not have Touch ID compatible devices or have Touch ID setup.
+                    Since this is an app to demonstrate secure practices, like step-up authentication,
+                    we will not create a fallback way of re-verifying the user.
+                */
+                let authenticationContext = LAContext()
+                
+                // Make sure the device is Touch ID compatible
+                guard authenticationContext.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else {
+                    self.presentAlert(alertTitle: "Incompatible Device", alertMessage: "We are unable to use Touch ID to verify your identity.")
+                    return
+                }
+                
+                // Ask for Touch ID validation
+                authenticationContext.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "Re-Authenticate to update your user details.", reply: { (success, error) in
+                    // Check if there were any errors
+                    if let error = error {
+                        print(error.localizedDescription)
+                        self.presentAlert(alertTitle: "Authentication Error", alertMessage: "Failure re-authenticating with Touch ID. Your user details will not be updated.")
+                        return
+                    } else if success {
+                        // Success - update user info
+                        self.updateUserInfo()
+                    }
+                    
+                })
+                
             })
             
         } else {
@@ -124,6 +154,7 @@ class HomeViewController: UIViewController {
                 return
             }
             
+            // Update current user with the newly modified user
             self.currentUser = currentUser
             
             // Remove all changed values
