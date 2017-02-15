@@ -124,19 +124,12 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     func validateText(option : validateOption) -> String? {
         if option == validateOption.username {
             // Validate username
-            guard let username = usernameTextField.text else {return nil}
-            guard username.characters.count >= 3 else {return nil}
+            guard let username = usernameTextField.text, username.characters.count > 3, validateUsername(usernameString: username) else {return nil}
             return username
         } else if option == validateOption.password {
             // Validate password
-            guard let password = passwordTextField.text else {return nil}
-            guard password.characters.count > 5 else {return nil}
-            
-            if containsSpecialChars(testString: password) {
-                return password
-            } else {
-                return nil
-            }
+            guard let password = passwordTextField.text, password.characters.count > 5, validatePassword(passwordString: password) else {return nil}
+            return password
         } else {
             return nil
         }
@@ -154,19 +147,31 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
+    func validateUsername(usernameString: String) -> Bool {
+        // 4 characters. One uppercase. One Lowercase. One number.
+        let test = NSPredicate(format: "SELF MATCHES %@", "^(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[a-z]).{4,}$")
+        return test.evaluate(with: usernameString)
+    }
+    
+    func validatePassword(passwordString: String) -> Bool {
+        // 6 characters. One uppercase. One Lowercase. One number. One Special.
+        let test = NSPredicate(format: "SELF MATCHES %@", "^(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[a-z])(?=.*?[-_\\.:;!@#\\$%\\^&\\*\\?<>]).{6,}$")
+        return test.evaluate(with: passwordString)
+    }
+    
     func processLogin() {
         if !signupActive {
             // Login - validate text
-            if let username = validateText(option: validateOption.username) {
-                if let password = validateText(option: validateOption.password) {
-                    // Username and password validated - try to log the user in
-                    loginWithUsername(username: username, password: password)
-                } else {
-                    presentAlert(alertTitle: "Password Error", alertMessage: "There was an error with your entered password. Passwords must be at least 6 characters and contain only letters and numbers.")
-                }
-            }  else {
-                presentAlert(alertTitle: "Username Error", alertMessage: "There was an error with your entered username. Usernames must be at least 4 characters and contain only letters and numbers.")
+            guard let username = validateText(option: validateOption.username) else {
+                presentAlert(alertTitle: "Username Error", alertMessage: "Usernames must be at least 4 characters and contain at least 1 of each: uppercase letter, lowercase letter and number.")
+                return
             }
+            guard let password = validateText(option: validateOption.password) else {
+                presentAlert(alertTitle: "Password Error", alertMessage: "Passwords must be at least 6 characters and contain at least 1 of each: uppercase letter, lowercase letter, number and special character.")
+                return
+            }
+            // Username and password validated - try to log the user in
+            loginWithUsername(username: username, password: password)
         }
     }
     

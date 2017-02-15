@@ -97,6 +97,8 @@ class HomeViewController: UIViewController {
     
     @IBAction func doneButtonPressed(_ sender: Any) {
         
+        view.endEditing(true)
+        
         if changedValues.count > 0 {
         
             presentAlert(alertTitle: "Save Changes?", alertMessage: "Would you like to save your changes?", cancelButtonTitle: "Cancel", cancelButtonAction: nil, okButtonTitle: "Save", okButtonAction: {

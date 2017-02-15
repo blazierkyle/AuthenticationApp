@@ -119,22 +119,15 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
         switch option {
         case validateOption.password:
             // Validate password
-            guard let password = passwordTextField.text else {return nil}
-            guard password.characters.count > 5 else {return nil}
-            
-            if containsSpecialChars(testString: password) {
-                return password
-            } else {
-                return nil
-            }
+            guard let password = passwordTextField.text, password.characters.count > 5, validatePassword(passwordString: password) else {return nil}
+            return password
         case validateOption.email:
             // Validate email
-            guard let email = emailTextField.text else {return nil}
-            guard email.characters.count > 4 else {return nil}
+            guard let email = emailTextField.text, validateEmail(emailString: email) else {return nil}
             return email
         case validateOption.username:
-            guard let username = usernameTextField.text else {return nil}
-            guard username.characters.count >= 3 else {return nil}
+            // Validate username
+            guard let username = usernameTextField.text, username.characters.count > 3, validateUsername(usernameString: username) else {return nil}
             return username
         }
     }
@@ -149,6 +142,23 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
         } catch {
             return false
         }
+    }
+    
+    func validateUsername(usernameString: String) -> Bool {
+        // 4 characters. One uppercase. One Lowercase. One number.
+        let test = NSPredicate(format: "SELF MATCHES %@", "^(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[a-z]).{4,}$")
+        return test.evaluate(with: usernameString)
+    }
+    
+    func validatePassword(passwordString: String) -> Bool {
+        // 6 characters. One uppercase. One Lowercase. One number. One Special.
+        let test = NSPredicate(format: "SELF MATCHES %@", "^(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[a-z])(?=.*?[-_\\.:;!@#\\$%\\^&\\*\\?<>]).{6,}$")
+        return test.evaluate(with: passwordString)
+    }
+    
+    func validateEmail(emailString: String) -> Bool {
+        let test = NSPredicate(format: "SELF MATCHES %@", "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}")
+        return test.evaluate(with: emailString)
     }
     
     func signupWithEmail(username: String, password : String, email : String) {
@@ -192,10 +202,10 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
     }
     
     func processSignup() {
-        // Signup - validate text
         
+        // Signup - validate text
         guard let username = validateText(option: .username) else {
-            presentAlert(alertTitle: "Username Error", alertMessage: "You have entered an invalid username. Please try again.")
+            presentAlert(alertTitle: "Username Error", alertMessage: "Usernames must be at least 4 characters and contain at least 1 of each: uppercase letter, lowercase letter and number.")
             return
         }
         
@@ -205,7 +215,7 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
         }
         
         guard let password = validateText(option: .password) else {
-            presentAlert(alertTitle: "Password Error", alertMessage: "There was an error with your entered password. Passwords must be at least 6 characters and contain only letters and numbers.")
+            presentAlert(alertTitle: "Password Error", alertMessage: "Passwords must be at least 6 characters and contain at least 1 of each: uppercase letter, lowercase letter, number and special character.")
             return
         }
         
