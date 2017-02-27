@@ -101,6 +101,11 @@ class ServiceManager {
                 // Convert to User model
                 let authenticatedUser = try User(dictionary: user as [String:AnyObject])
                 
+                // Check if we have a timestamp for when the session began
+                if let sessionBegan = json["sessionStart"] as? String {
+                    authenticatedUser.sessionBegan = sessionBegan
+                }
+                
                 guard let apiKey = user["api_key"] as? String, let apiSecret = user["api_secret"] as? String else {
                     failure(nil)
                     return
@@ -279,6 +284,11 @@ class ServiceManager {
                 let authenticatedUser = try User(dictionary: user as [String:AnyObject])
                 authenticatedUser.authToken = encodedAuthString
                 
+                // Check if we have a timestamp for when the session began
+                if let sessionBegan = json["sessionStart"] as? String {
+                    authenticatedUser.sessionBegan = sessionBegan
+                }
+                
                 // Success - return user in completion block
                 successBlock(authenticatedUser)
                 
@@ -345,7 +355,12 @@ class ServiceManager {
             // We did not recieve an error, have an HTTP Response, recieved data back and have a 200 response code
             do {
                 // Convert into dictionary
-                guard let userDetails = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] else {
+                guard let responseDict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] else {
+                    failure(nil)
+                    return
+                }
+                
+                guard let success = responseDict["success"] as? Bool, success == true, let userDetails = responseDict["user"] as? [String:Any] else {
                     failure(nil)
                     return
                 }
@@ -355,6 +370,11 @@ class ServiceManager {
                 // Convert to User model
                 let authenticatedUser = try User(dictionary: userDetails as [String:AnyObject])
                 authenticatedUser.authToken = authToken
+                
+                // Check if we have a timestamp for when the session began
+                if let sessionBegan = responseDict["sessionStart"] as? String {
+                    authenticatedUser.sessionBegan = sessionBegan
+                }
                 
                 // User is authenticated - return user in completion block
                 successBlock(authenticatedUser)
@@ -446,6 +466,11 @@ class ServiceManager {
                 // Convert to User model
                 let currentUser = try User(dictionary: userDetails as [String:AnyObject])
                 currentUser.authToken = authToken
+                
+                // Check if we have a timestamp for when the session began
+                if let sessionBegan = json["sessionStart"] as? String {
+                    currentUser.sessionBegan = sessionBegan
+                }
                 
                 // Success - return user in completion block
                 successBlock(currentUser)

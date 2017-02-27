@@ -13,19 +13,18 @@ class User: ExpressibleByJSONDictionary {
     var username: String
     var email: String
     var name: String?
-    var deviceToken: String?
     var authToken: String?
+    var sessionBegan: String?
     
     required public init(dictionary: [String: AnyObject]) throws {
         self.id = try dictionary.decode("id")
         self.username = try dictionary.decode("username")
         self.email = try dictionary.decode("email")
         self.name = try dictionary.decode("name")
-        self.deviceToken = try dictionary.decode("deviceToken")
     }
     
     func getUserDetailsString() -> String {
-        return "User Details: ID= \(id), Username= \(username), Email= \(email), Name= \(name ?? "No Name"), Device Token= \(deviceToken ?? "No device token")"
+        return "User Details: ID= \(id), Username= \(username), Email= \(email), Name= \(name ?? "No Name")"
     }
 }
 

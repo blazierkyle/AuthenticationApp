@@ -18,6 +18,8 @@ class HomeViewController: UIViewController {
     var currentUser: User?
     
     var changedValues = [String:String]()
+    
+    var refreshControl: UIRefreshControl?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,6 +34,13 @@ class HomeViewController: UIViewController {
         navigationController?.navigationItem.setRightBarButton(logoutButton, animated: false)
         
         userDetailsTableView.dataSource = self
+        
+        // Setup TableView refresh control
+        let refresh = UIRefreshControl()
+        refresh.attributedTitle = NSAttributedString(string: "Pull to refresh user details")
+        refresh.addTarget(self, action: #selector(refreshUserDetails), for: .valueChanged)
+        userDetailsTableView.backgroundView = refresh
+        refreshControl = refresh
 
     }
     
@@ -60,6 +69,25 @@ class HomeViewController: UIViewController {
             return
         }
         
+    }
+    
+    func refreshUserDetails() {
+        guard let currentUser = currentUser, let authToken = currentUser.authToken else {return}
+        
+        // Service call to get the user details and reload tableView
+        ServiceManager.sharedInstance.getUserDetails(authToken: authToken, successBlock: { (user) in
+            
+            guard let user = user else {return}
+            self.currentUser = user
+            DispatchQueue.main.async {
+                self.refreshControl?.endRefreshing()
+                self.userDetailsTableView.reloadData()
+            }
+            
+        }) { (errorMessage) in
+            guard let errorMessage = errorMessage else {return}
+            self.presentAlert(alertTitle: "Error", alertMessage: errorMessage)
+        }
     }
     
     func presentGenericError() {
@@ -187,7 +215,7 @@ extension HomeViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 4
+        return 5
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -213,6 +241,10 @@ extension HomeViewController: UITableViewDataSource {
             cell.label.text = "Name"
             cell.textField.text = currentUser.name
             cell.textField.isEnabled = true
+        case 4:
+            cell.label.text = "Session Began"
+            cell.textField.text = currentUser.sessionBegan
+            cell.textField.isEnabled = false
         default:
             return UITableViewCell()
         }
